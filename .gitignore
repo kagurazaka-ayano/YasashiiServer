@@ -35,3 +35,9 @@
 build
 cmake-build-*
 
+# IDE
+.vscode
+.idea
+
+# apple
+.DS_Store

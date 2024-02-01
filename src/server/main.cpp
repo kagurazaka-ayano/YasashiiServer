@@ -8,6 +8,9 @@
 
 #include "httplib.h"
 #include "Logger.h"
+#include "KawaiiMQ/kawaiiMQ.h"
+#include "Handler.h"
+#include "apiDefinition.h"
 
 using namespace YasashiiServer;
 
@@ -23,12 +26,8 @@ int main() {
     }
 
     Logger::info("server started at port: " + std::to_string(PORT));
-
-    server.Get("/add/", [](const httplib::Request& req, httplib::Response& res) {
-        int a = req.get_param_value("a").empty() ? 0 : std::stoi(req.get_param_value("a"));
-        int b = req.get_param_value("b").empty() ? 0 : std::stoi(req.get_param_value("b"));
-        res.set_content(std::to_string(a + b), "text/plain");
-    });
+    server.Post("/queue/relate", RelateHandler());
+    server.Post("/queue/unrelate", UnrelateHandler());
 
     server.listen("localhost", PORT);
 }
