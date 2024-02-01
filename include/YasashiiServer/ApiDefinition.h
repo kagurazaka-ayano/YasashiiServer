@@ -21,8 +21,8 @@ namespace YasashiiServer {
     constexpr char FETCH_ALL[] = "/consumer/fetch_all";
     constexpr char PRODUCER_SUBSCRIBE[] = "/producer/subscribe";
     constexpr char PRODUCER_UNSUBSCRIBE[] = "/producer/unsubscribe";
-    constexpr char SEND[] = "/producer/send";
-    constexpr char BROADCAST[] = "/producer/broadcast";
+    constexpr char SEND_BASE[] = "/producer/send/";
+    constexpr char BROADCAST_BASE[] = "/producer/broadcast/";
 }
 
 #endif //YASASHIISERVER_APIDEFINITION_H

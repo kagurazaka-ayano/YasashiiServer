@@ -9,7 +9,6 @@
 #define YASASHIISERVER_UTILITY_H
 
 #include "Logger.h"
-#include "Exceptions.h"
 
 namespace YasashiiServer {
 

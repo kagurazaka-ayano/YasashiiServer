@@ -43,7 +43,6 @@ FetchContent_Declare(cereal
 FetchContent_MakeAvailable(cereal)
 list(APPEND INCLUDE ${cereal_SOURCE_DIR}/include)
 
-
 include_directories(${INCLUDE})
 
 add_executable(YasashiiServer_server ${SRC_SERVER} ${SRC_COMMON})

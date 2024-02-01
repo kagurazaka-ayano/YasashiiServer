@@ -14,22 +14,26 @@ namespace YasashiiServer {
         Logger::info("relate request received");
         TopicData topic;
         try {
-            topic = deserialize<TopicData>(req.get_param_value("topic_data"));
+            std::stringstream topic_stream(req.get_param_value("topic_data"));
+            cereal::BinaryInputArchive iarchive(topic_stream);
+            iarchive(topic);
         }
-        catch (DeserializationException&) {
-            Logger::error("failed to deserialize topic data");
+        catch (std::exception& e) {
+            Logger::error("failed to deserialize topic data, message: " + std::string(e.what()));
             res.status = 500;
-            res.set_content("failed to deserialize topic data", "text/plain");
+            res.set_content("failed to deserialize topic data, message: " + std::string(e.what()), "text/plain");
             return;
         }
         QueueData queue;
         try {
-            queue = deserialize<QueueData>(req.get_param_value("queue_data"));
+            std::stringstream queue_stream(req.get_param_value("queue_data"));
+            cereal::BinaryInputArchive iarchive(queue_stream);
+            iarchive(queue);
         }
-        catch (DeserializationException&) {
-            Logger::error("failed to deserialize queue data");
+        catch (std::exception& e) {
+            Logger::error("failed to deserialize queue data, message: " + std::string(e.what()));
             res.status = 500;
-            res.set_content("failed to deserialize queue data", "text/plain");
+            res.set_content("failed to deserialize queue data, message: " + std::string(e.what()), "text/plain");
             return;
         }
         auto q = KawaiiMQ::makeQueue(queue.name);
@@ -42,10 +46,10 @@ namespace YasashiiServer {
         catch(KawaiiMQ::TopicException& e) {
             Logger::error("failed to relate topic to queue");
             res.status = 500;
-            res.set_content("failed to relate topic to queue, message: " + std::string(e.what()), "text/plain");
+            res.set_content("failed to relate topic to queue", "text/plain");
             return;
         }
-        queue_map.try_emplace(queue.name, q);
+        ServerHelper::queue_map.try_emplace(queue.name, q);
         res.set_content("OK", "text/plain");
     }
 
@@ -53,21 +57,25 @@ namespace YasashiiServer {
         TopicData topic;
         QueueData queue;
         try {
-            topic = deserialize<TopicData>(req.get_param_value("topic_data"));
+            std::stringstream topic_stream(req.get_param_value("topic_data"));
+            cereal::BinaryInputArchive iarchive(topic_stream);
+            iarchive(topic);
         }
-        catch (DeserializationException&) {
-            Logger::error("failed to deserialize topic data");
+        catch (std::exception& e) {
+            Logger::error("failed to deserialize topic data, message: " + std::string(e.what()));
             res.status = 500;
-            res.set_content("failed to deserialize topic data", "text/plain");
+            res.set_content("failed to deserialize topic data, message: " + std::string(e.what()), "text/plain");
             return;
         }
         try {
-            queue = deserialize<QueueData>(req.get_param_value("queue_data"));
+            std::stringstream queue_stream(req.get_param_value("queue_data"));
+            cereal::BinaryInputArchive iarchive(queue_stream);
+            iarchive(queue);
         }
-        catch (DeserializationException&) {
-            Logger::error("failed to deserialize queue data");
+        catch (std::exception& e) {
+            Logger::error("failed to deserialize queue data, message: " + std::string(e.what()));
             res.status = 500;
-            res.set_content("failed to deserialize queue data", "text/plain");
+            res.set_content("failed to deserialize queue data, message: " + std::string(e.what()), "text/plain");
             return;
         }
         auto manager = KawaiiMQ::MessageQueueManager::Instance();
@@ -95,7 +103,7 @@ namespace YasashiiServer {
             }
         }
         if(!find) {
-            queue_map.erase(queue.name);
+            ServerHelper::queue_map.erase(queue.name);
         }
         res.set_content("OK", "text/plain");
     }
@@ -104,29 +112,33 @@ namespace YasashiiServer {
     void ProducerSubscribeHandler::operator()(const httplib::Request &req, httplib::Response &res) {
         TopicData topic;
         try {
-            topic = deserialize<TopicData>(req.get_param_value("topic_data"));
+            std::stringstream topic_stream(req.get_param_value("topic_data"));
+            cereal::BinaryInputArchive iarchive(topic_stream);
+            iarchive(topic);
         }
-        catch (DeserializationException&) {
-            Logger::error("failed to deserialize topic data");
+        catch (std::exception& e) {
+            Logger::error("failed to deserialize topic data, message: " + std::string(e.what()));
             res.status = 500;
-            res.set_content("failed to deserialize topic data", "text/plain");
+            res.set_content("failed to deserialize topic data, message: " + std::string(e.what()), "text/plain");
             return;
         }
         ProducerData producer;
         try {
-            producer = deserialize<ProducerData>(req.get_param_value("producer_data"));
+            std::stringstream producer_stream(req.get_param_value("producer_data"));
+            cereal::BinaryInputArchive iarchive(producer_stream);
+            iarchive(producer);
         }
-        catch (DeserializationException&) {
-            Logger::error("failed to deserialize producer data");
+        catch (std::exception& e) {
+            Logger::error("failed to deserialize producer data, message: " + std::string(e.what()));
             res.status = 500;
-            res.set_content("failed to deserialize producer data", "text/plain");
+            res.set_content("failed to deserialize producer data, message: " + std::string(e.what()), "text/plain");
             return;
         }
         auto manager = KawaiiMQ::MessageQueueManager::Instance();
-        producer_map.try_emplace(producer.name, producer.name);
+        ServerHelper::producer_map.try_emplace(producer.name, producer.name);
         KawaiiMQ::Topic t(topic.name);
         try {
-            producer_map.at(producer.name).subscribe(t);
+            ServerHelper::producer_map.at(producer.name).subscribe(t);
         }
         catch(KawaiiMQ::TopicException& e) {
             Logger::error("failed to subscribe to topic");
@@ -139,30 +151,34 @@ namespace YasashiiServer {
     void ProducerUnsubscribeHandler::operator()(const httplib::Request &req, httplib::Response &res) {
         TopicData topic;
         try {
-            topic = deserialize<TopicData>(req.get_param_value("topic_data"));
+            std::stringstream topic_stream(req.get_param_value("topic_data"));
+            cereal::BinaryInputArchive iarchive(topic_stream);
+            iarchive(topic);
         }
-        catch (DeserializationException&) {
-            Logger::error("failed to deserialize topic data");
+        catch (std::exception& e) {
+            Logger::error("failed to deserialize topic data, message: " + std::string(e.what()));
             res.status = 500;
-            res.set_content("failed to deserialize topic data", "text/plain");
+            res.set_content("failed to deserialize topic data, message: " + std::string(e.what()), "text/plain");
             return;
         }
         ProducerData producer;
         try {
-            producer = deserialize<ProducerData>(req.get_param_value("producer_data"));
+            std::stringstream producer_stream(req.get_param_value("producer_data"));
+            cereal::BinaryInputArchive iarchive(producer_stream);
+            iarchive(producer);
         }
-        catch (DeserializationException&) {
-            Logger::error("failed to deserialize producer data");
+        catch (std::exception& e) {
+            Logger::error("failed to deserialize producer data, message: " + std::string(e.what()));
             res.status = 500;
-            res.set_content("failed to deserialize producer data", "text/plain");
+            res.set_content("failed to deserialize producer data, message: " + std::string(e.what()), "text/plain");
             return;
         }
         auto manager = KawaiiMQ::MessageQueueManager::Instance();
         KawaiiMQ::Topic t(topic.name);
         try {
-            producer_map.at(producer.name).unsubscribe(t);
-            if (producer_map.at(producer.name).getSubscribedTopics().empty()) {
-                producer_map.erase(producer.name);
+            ServerHelper::producer_map.at(producer.name).unsubscribe(t);
+            if (ServerHelper::producer_map.at(producer.name).getSubscribedTopics().empty()) {
+                ServerHelper::producer_map.erase(producer.name);
             }
         }
         catch(KawaiiMQ::TopicException& e) {
@@ -176,29 +192,33 @@ namespace YasashiiServer {
     void ConsumerSubscribeHandler::operator()(const httplib::Request &req, httplib::Response &res) {
         TopicData topic;
         try {
-            topic = deserialize<TopicData>(req.get_param_value("topic_data"));
+            std::stringstream topic_stream(req.get_param_value("topic_data"));
+            cereal::BinaryInputArchive iarchive(topic_stream);
+            iarchive(topic);
         }
-        catch (DeserializationException&) {
-            Logger::error("failed to deserialize topic data");
+        catch (std::exception& e) {
+            Logger::error("failed to deserialize topic data, message: " + std::string(e.what()));
             res.status = 500;
-            res.set_content("failed to deserialize topic data", "text/plain");
+            res.set_content("failed to deserialize topic data, message: " + std::string(e.what()), "text/plain");
             return;
         }
         ConsumerData consumer;
         try {
-            consumer = deserialize<ConsumerData>(req.get_param_value("producer_data"));
+            std::stringstream consumer_stream(req.get_param_value("producer_data"));
+            cereal::BinaryInputArchive iarchive(consumer_stream);
+            iarchive(consumer);
         }
-        catch (DeserializationException&) {
-            Logger::error("failed to deserialize consumer data");
+        catch (std::exception& e) {
+            Logger::error("failed to deserialize consumer data, message: " + std::string(e.what()));
             res.status = 500;
-            res.set_content("failed to deserialize consumer data", "text/plain");
+            res.set_content("failed to deserialize consumer data, message: " + std::string(e.what()), "text/plain");
             return;
         }
         auto manager = KawaiiMQ::MessageQueueManager::Instance();
-        consumer_map.try_emplace(consumer.name, consumer.name);
+        ServerHelper::consumer_map.try_emplace(consumer.name, consumer.name);
         KawaiiMQ::Topic t(topic.name);
         try {
-            producer_map.at(consumer.name).subscribe(t);
+            ServerHelper::producer_map.at(consumer.name).subscribe(t);
         }
         catch(KawaiiMQ::TopicException& e) {
             Logger::error("failed to subscribe to topic");
@@ -211,30 +231,34 @@ namespace YasashiiServer {
     void ConsumerUnsubscribeHandler::operator()(const httplib::Request &req, httplib::Response &res) {
         TopicData topic;
         try {
-            topic = deserialize<TopicData>(req.get_param_value("topic_data"));
+            std::stringstream topic_stream(req.get_param_value("topic_data"));
+            cereal::BinaryInputArchive iarchive(topic_stream);
+            iarchive(topic);
         }
-        catch (DeserializationException&) {
-            Logger::error("failed to deserialize topic data");
+        catch (std::exception& e) {
+            Logger::error("failed to deserialize topic data, message: " + std::string(e.what()));
             res.status = 500;
-            res.set_content("failed to deserialize topic data", "text/plain");
+            res.set_content("failed to deserialize topic data, message: " + std::string(e.what()), "text/plain");
             return;
         }
         ConsumerData consumer;
         try {
-            consumer = deserialize<ConsumerData>(req.get_param_value("producer_data"));
+            std::stringstream consumer_stream(req.get_param_value("producer_data"));
+            cereal::BinaryInputArchive iarchive(consumer_stream);
+            iarchive(consumer);
         }
-        catch (DeserializationException&) {
-            Logger::error("failed to deserialize consumer data");
+        catch (std::exception& e) {
+            Logger::error("failed to deserialize consumer data, message: " + std::string(e.what()));
             res.status = 500;
-            res.set_content("failed to deserialize consumer data", "text/plain");
+            res.set_content("failed to deserialize consumer data, message: " + std::string(e.what()), "text/plain");
             return;
         }
         auto manager = KawaiiMQ::MessageQueueManager::Instance();
         KawaiiMQ::Topic t(topic.name);
         try {
-            producer_map.at(consumer.name).unsubscribe(t);
-            if (producer_map.at(consumer.name).getSubscribedTopics().empty()) {
-                producer_map.erase(consumer.name);
+            ServerHelper::producer_map.at(consumer.name).unsubscribe(t);
+            if (ServerHelper::producer_map.at(consumer.name).getSubscribedTopics().empty()) {
+                ServerHelper::producer_map.erase(consumer.name);
             }
         }
         catch(KawaiiMQ::TopicException& e) {
@@ -251,7 +275,7 @@ namespace YasashiiServer {
         int timeout = std::atoi(req.get_param_value("timeout").c_str());
         try
         {
-            queue_map.at(name)->setTimeout(timeout);
+            ServerHelper::queue_map.at(name)->setTimeout(timeout);
         }
         catch(const std::exception& e)
         {
@@ -267,7 +291,7 @@ namespace YasashiiServer {
         int timeout = std::atoi(req.get_param_value("timeout").c_str());
         try
         {
-            queue_map.at(name)->setSafeTimeout(timeout);
+            ServerHelper::queue_map.at(name)->setSafeTimeout(timeout);
         }
         catch(const std::exception& e)
         {
@@ -276,47 +300,55 @@ namespace YasashiiServer {
             res.set_content("cannot find queue with name: " + name, "text/plain");
         }
     }
+
+
     void SendHandler::operator()(const httplib::Request &req, httplib::Response &res)
     {
+        Logger::info(fmt::format("send request received, accessing: {}", req.path));
         ProducerData producer;
         try {
-            producer = deserialize<ProducerData>(req.get_param_value("producer_data"));
+            std::stringstream producer_stream(req.get_param_value("producer_data"));
+            cereal::BinaryInputArchive iarchive(producer_stream);
+            iarchive(producer);
         }
-        catch (DeserializationException&) {
-            Logger::error("failed to deserialize producer data");
+        catch (std::exception& e) {
+            Logger::error("failed to deserialize producer data, message: " + std::string(e.what()));
             res.status = 500;
-            res.set_content("failed to deserialize producer data", "text/plain");
+            res.set_content("failed to deserialize producer data: " + std::string(e.what()), "text/plain");
             return;
         }
+        ISeralizable message;
         try{
-            const auto example = *type_mapping.at(req.get_param_value("message_type"));
-            MessageData message = deserialize<MessageData<decltype(example)>>(req.get_param_value("message_data"));
+            std::stringstream message_stream(req.get_param_value("message_data"));
+            cereal::BinaryInputArchive iarchive(message_stream);
+            iarchive(message);
         }
         catch (std::out_of_range& e) {
             Logger::error("type not registered");
             res.status = 500;
             res.set_content("type not registered, please run registerType at server side first", "text/plain");
         }
-        catch (DeserializationException&) {
-            Logger::error("failed to deserialize message data");
+        catch (std::exception& e) {
+            Logger::error("failed to deserialize message data, message: " + std::string(e.what()));
             res.status = 500;
-            res.set_content("failed to deserialize message data", "text/plain");
+            res.set_content("failed to deserialize message data: " + std::string(e.what()), "text/plain");
             return;
         }
         TopicData topic;
         try {
-            topic = deserialize<TopicData>(req.get_param_value("topic_data"));
+            std::stringstream topic_stream(req.get_param_value("topic_data"));
+            cereal::BinaryInputArchive iarchive(topic_stream);
+            iarchive(topic);
         }
-        catch (DeserializationException&) {
-            Logger::error("failed to deserialize topic data");
+        catch (std::exception& e) {
+            Logger::error("failed to deserialize topic data, message: " + std::string(e.what()));
             res.status = 500;
-            res.set_content("failed to deserialize topic data", "text/plain");
+            res.set_content("failed to deserialize topic data: message" + std::string(e.what()), "text/plain");
             return;
         }
         auto manager = KawaiiMQ::MessageQueueManager::Instance();
-        KawaiiMQ::Topic t(topic.name);
-        KawaiiMQ::Producer p(producer.name);
-        
+        auto message_sending = KawaiiMQ::makeMessage(message);
+        ServerHelper::producer_map.at(producer.name).publishMessage(KawaiiMQ::Topic(topic.name), message_sending);
     }
 }
 

@@ -8,9 +8,10 @@
 
 #include "httplib.h"
 #include "Logger.h"
-#include "KawaiiMQ/kawaiiMQ.h"
 #include "Handler.h"
-#include "apiDefinition.h"
+#include "ApiDefinition.h"
+#include "Types/Types.h"
+#include "fmt/format.h"
 
 using namespace YasashiiServer;
 
@@ -25,9 +26,18 @@ int main() {
         return 1;
     }
 
+
+    TypeHelper::Instance()->registerType<SampleClass>();
+
+
     Logger::info("server started at port: " + std::to_string(PORT));
-    server.Post("/queue/relate", RelateHandler());
-    server.Post("/queue/unrelate", UnrelateHandler());
+    server.Post(RELATE, RelateHandler());
+    server.Post(UNRELATE, UnrelateHandler());
+
+    for(const auto& type: TypeHelper::types) {
+        Logger::info(fmt::format("subscribing to type: {}", TypeHelper::Instance()->demangle(type.c_str())));
+        server.Post(SEND_BASE + TypeHelper::Instance()->demangle(type.c_str()), SendHandler());
+    }
 
     server.listen("localhost", PORT);
 }

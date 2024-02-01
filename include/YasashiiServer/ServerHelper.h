@@ -9,20 +9,18 @@
 #define YASASHIISERVER_SERVERHELPER_H
 
 #include "KawaiiMQ/kawaiiMQ.h"
+#include "cereal/types/polymorphic.hpp"
+#include "cereal/archives/portable_binary.hpp"
 #include <unordered_map>
 
 namespace YasashiiServer {
 
-    std::unordered_map<std::string, KawaiiMQ::Producer> producer_map;
-    std::unordered_map<std::string, KawaiiMQ::Consumer> consumer_map;
-    std::unordered_map<std::string, std::shared_ptr<KawaiiMQ::Queue>> queue_map;
-    std::unordered_map<std::string, std::shared_ptr<KawaiiMQ::MessageData>> type_mapping;
+    struct ServerHelper {
+        static std::unordered_map<std::string, KawaiiMQ::Producer> producer_map;
+        static std::unordered_map<std::string, KawaiiMQ::Consumer> consumer_map;
+        static std::unordered_map<std::string, std::shared_ptr<KawaiiMQ::Queue>> queue_map;
+    };
 
-    template<KawaiiMQ::MessageType T>
-    requires std::is_convertible_v<T, std::byte>
-    void registerType(const T& in) {
-        type_mapping[typeid(T).name()] = KawaiiMQ::makeMessage(in);
-    }
 }
 
 
