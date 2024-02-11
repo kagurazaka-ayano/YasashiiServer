@@ -54,6 +54,7 @@ namespace YasashiiServer {
     }
 
     void UnrelateHandler::operator()(const httplib::Request &req, httplib::Response &res) {
+        Logger::info("unrelate request received");
         TopicData topic;
         QueueData queue;
         try {
@@ -110,6 +111,7 @@ namespace YasashiiServer {
 
 
     void ProducerSubscribeHandler::operator()(const httplib::Request &req, httplib::Response &res) {
+        Logger::info("producer subscribe request received");
         TopicData topic;
         try {
             std::stringstream topic_stream(req.get_param_value("topic_data"));
@@ -149,6 +151,7 @@ namespace YasashiiServer {
     }
 
     void ProducerUnsubscribeHandler::operator()(const httplib::Request &req, httplib::Response &res) {
+        Logger::info("producer unsubscribe request received");
         TopicData topic;
         try {
             std::stringstream topic_stream(req.get_param_value("topic_data"));
@@ -190,6 +193,7 @@ namespace YasashiiServer {
     }
 
     void ConsumerSubscribeHandler::operator()(const httplib::Request &req, httplib::Response &res) {
+        Logger::info("consumer subscribe request received");
         TopicData topic;
         try {
             std::stringstream topic_stream(req.get_param_value("topic_data"));
@@ -204,7 +208,7 @@ namespace YasashiiServer {
         }
         ConsumerData consumer;
         try {
-            std::stringstream consumer_stream(req.get_param_value("producer_data"));
+            std::stringstream consumer_stream(req.get_param_value("consumer_data"));
             cereal::BinaryInputArchive iarchive(consumer_stream);
             iarchive(consumer);
         }
@@ -218,7 +222,7 @@ namespace YasashiiServer {
         ServerHelper::consumer_map.try_emplace(consumer.name, consumer.name);
         KawaiiMQ::Topic t(topic.name);
         try {
-            ServerHelper::producer_map.at(consumer.name).subscribe(t);
+            ServerHelper::consumer_map.at(consumer.name).subscribe(t);
         }
         catch(KawaiiMQ::TopicException& e) {
             Logger::error("failed to subscribe to topic");
@@ -229,6 +233,7 @@ namespace YasashiiServer {
     }
 
     void ConsumerUnsubscribeHandler::operator()(const httplib::Request &req, httplib::Response &res) {
+        Logger::info("consumer unsubscribe request received");
         TopicData topic;
         try {
             std::stringstream topic_stream(req.get_param_value("topic_data"));
@@ -243,7 +248,7 @@ namespace YasashiiServer {
         }
         ConsumerData consumer;
         try {
-            std::stringstream consumer_stream(req.get_param_value("producer_data"));
+            std::stringstream consumer_stream(req.get_param_value("consumer_data"));
             cereal::BinaryInputArchive iarchive(consumer_stream);
             iarchive(consumer);
         }
@@ -271,6 +276,7 @@ namespace YasashiiServer {
     }
 
     void SetTimeoutHandler::operator()(const httplib::Request &req, httplib::Response &res) {
+        Logger::info("set timeout request received");
         std::string name = req.get_param_value("queue_name");
         int timeout = std::atoi(req.get_param_value("timeout").c_str());
         try
@@ -287,6 +293,7 @@ namespace YasashiiServer {
     }
     void SetSafeTimeoutHandler::operator()(const httplib::Request &req, httplib::Response &res)
     {
+        Logger::info("set safe timeout request received");
         std::string name = req.get_param_value("queue_name");
         int timeout = std::atoi(req.get_param_value("timeout").c_str());
         try
@@ -301,55 +308,6 @@ namespace YasashiiServer {
         }
     }
 
-
-    void SendHandler::operator()(const httplib::Request &req, httplib::Response &res)
-    {
-        Logger::info(fmt::format("send request received, accessing: {}", req.path));
-        ProducerData producer;
-        try {
-            std::stringstream producer_stream(req.get_param_value("producer_data"));
-            cereal::BinaryInputArchive iarchive(producer_stream);
-            iarchive(producer);
-        }
-        catch (std::exception& e) {
-            Logger::error("failed to deserialize producer data, message: " + std::string(e.what()));
-            res.status = 500;
-            res.set_content("failed to deserialize producer data: " + std::string(e.what()), "text/plain");
-            return;
-        }
-        ISeralizable message;
-        try{
-            std::stringstream message_stream(req.get_param_value("message_data"));
-            cereal::BinaryInputArchive iarchive(message_stream);
-            iarchive(message);
-        }
-        catch (std::out_of_range& e) {
-            Logger::error("type not registered");
-            res.status = 500;
-            res.set_content("type not registered, please run registerType at server side first", "text/plain");
-        }
-        catch (std::exception& e) {
-            Logger::error("failed to deserialize message data, message: " + std::string(e.what()));
-            res.status = 500;
-            res.set_content("failed to deserialize message data: " + std::string(e.what()), "text/plain");
-            return;
-        }
-        TopicData topic;
-        try {
-            std::stringstream topic_stream(req.get_param_value("topic_data"));
-            cereal::BinaryInputArchive iarchive(topic_stream);
-            iarchive(topic);
-        }
-        catch (std::exception& e) {
-            Logger::error("failed to deserialize topic data, message: " + std::string(e.what()));
-            res.status = 500;
-            res.set_content("failed to deserialize topic data: message" + std::string(e.what()), "text/plain");
-            return;
-        }
-        auto manager = KawaiiMQ::MessageQueueManager::Instance();
-        auto message_sending = KawaiiMQ::makeMessage(message);
-        ServerHelper::producer_map.at(producer.name).publishMessage(KawaiiMQ::Topic(topic.name), message_sending);
-    }
 }
 
 

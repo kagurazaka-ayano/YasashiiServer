@@ -10,7 +10,7 @@
 #include <queue>
 #include "KawaiiMQ/kawaiiMQ.h"
 #include "cereal/archives/binary.hpp"
-#include "Types/Types.h"
+#include "TypeHelper.h"
 
 namespace YasashiiServer {
     struct TopicData {
@@ -39,13 +39,11 @@ namespace YasashiiServer {
         }
     };
 
-    template <Serializable T>
     struct MessageData {
-        T message_content;
-        std::string type;
+        KawaiiMQ::MessageData message_content;
         template<class Archive>
         void serialize(Archive &archive) {
-            archive(message_content, type);
+            archive(message_content);
         }
     };
 

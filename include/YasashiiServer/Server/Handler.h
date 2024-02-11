@@ -12,7 +12,6 @@
 #include "KawaiiMQ/kawaiiMQ.h"
 #include "Logger.h"
 #include "Types/SerializationTypes.h"
-#include "Utility.hpp"
 #include "ServerHelper.h"
 #include "cereal/archives/binary.hpp"
 #include "cereal/types/memory.hpp"
@@ -20,7 +19,7 @@
 #include "cereal/types/vector.hpp"
 #include "cereal/types/polymorphic.hpp"
 #include "cereal/archives/portable_binary.hpp"
-#include "Types/Types.h"
+#include "Types/TypeHelper.h"
 #include <cstdlib>
 #include <type_traits>
 #include <string>

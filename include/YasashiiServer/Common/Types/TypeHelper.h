@@ -5,17 +5,17 @@
  * @brief
 */
 
-#ifndef YASASHIISERVER_TYPES_H
-#define YASASHIISERVER_TYPES_H
+#ifndef YASASHIISERVER_TYPEHELPER_H
+#define YASASHIISERVER_TYPEHELPER_H
 #include <string>
 #include <vector>
 #include <typeinfo>
 #include <unordered_map>
 #include <variant>
+#include <cxxabi.h>
+#include "Types/Types.hpp"
 #include "KawaiiMQ/kawaiiMQ.h"
-#include "SampleClass.h"
-#include "ISeralizable.h"
-#include "cxxabi.h"
+#include "Logger.h"
 
 namespace YasashiiServer {
 
@@ -25,12 +25,13 @@ namespace YasashiiServer {
             static std::shared_ptr<TypeHelper> instance = std::make_shared<TypeHelper>();
             return instance;
         }
-        template<Serializable T>
+        template<Serializable T, class S>
         void registerType() {
-            types.emplace_back((typeid(T).name()));
+            Logger::info("Registering type " + demangle(typeid(T).name()) + " to TypeHelper");
+            types.try_emplace(demangle(typeid(T).name()), std::make_unique<S>());
         }
-        static std::vector<std::string> types;
-        std::string demangle(const char *name) {
+        static std::unordered_map<std::string, std::unique_ptr<TypeStrategy>> types;
+        static std::string demangle(const char *name) {
             int status;
             char *realname = abi::__cxa_demangle(name, 0, 0, &status);
             std::string result(realname);
@@ -41,10 +42,5 @@ namespace YasashiiServer {
 
 }
 
-// Register all types here
-CEREAL_REGISTER_TYPE(YasashiiServer::SampleClass);
 
-// Register all polymorphic relations here
-CEREAL_REGISTER_POLYMORPHIC_RELATION(YasashiiServer::ISeralizable, YasashiiServer::SampleClass);
-
-#endif //YASASHIISERVER_TYPES_H
+#endif //YASASHIISERVER_TYPEHELPER_H

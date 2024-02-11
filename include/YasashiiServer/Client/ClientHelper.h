@@ -12,14 +12,13 @@
 #include "KawaiiMQ/kawaiiMQ.h"
 #include "Types/SerializationTypes.h"
 #include "Logger.h"
-#include "Utility.hpp"
 #include "ApiDefinition.h"
 #include "cereal/archives/binary.hpp"
 #include "cereal/types/memory.hpp"
 #include "cereal/types/unordered_map.hpp"
 #include "cereal/types/vector.hpp"
-#include "Types/Types.h"
-#include "Types/ISeralizable.h"
+#include "Types/TypeHelper.h"
+#include "Types/Types.hpp"
 #include <limits>
 #include <memory>
 
@@ -43,7 +42,7 @@ namespace YasashiiServer {
     httplib::Result setSafeTimeout(httplib::Client& client, std::shared_ptr<KawaiiMQ::Queue> queue, int timeout);
 
     template<Serializable T>
-    httplib::Result send(httplib::Client& client, const KawaiiMQ::Producer& prod, const std::shared_ptr<KawaiiMQ::Message<T>>& msg, const KawaiiMQ::Topic& topic);
+    httplib::Result send(httplib::Client& client, const KawaiiMQ::Producer& prod, const std::shared_ptr<T>& msg, const KawaiiMQ::Topic& topic);
 
     template<Serializable T>
     httplib::Result broadcast(httplib::Client& client, const KawaiiMQ::Producer& prod, const std::shared_ptr<KawaiiMQ::Message<T>>& msg);
@@ -55,7 +54,7 @@ namespace YasashiiServer {
     httplib::Result fetchAll(httplib::Client& client, const KawaiiMQ::Consumer& con);
 
     template<Serializable T>
-    httplib::Result send(httplib::Client& client, const KawaiiMQ::Producer& prod, const std::shared_ptr<KawaiiMQ::Message<T>>& msg, const KawaiiMQ::Topic& topic){
+    httplib::Result send(httplib::Client& client, const KawaiiMQ::Producer& prod, const std::shared_ptr<T>& msg, const KawaiiMQ::Topic& topic){
         std::stringstream producer_data_out;
         {
             ProducerData producer;
@@ -68,10 +67,8 @@ namespace YasashiiServer {
         }
         std::stringstream message_data_out;
         {
-            MessageData<T> message;
-            message.message_content = KawaiiMQ::getMessage<T>(msg);
             cereal::BinaryOutputArchive oarchive(message_data_out);
-            oarchive(message);
+            oarchive(msg);
         }
         std::stringstream topic_data_out;
         {
@@ -85,8 +82,10 @@ namespace YasashiiServer {
                 {"topic_name", topic.getName()},
                 {"producer_data", producer_data_out.str()},
                 {"message_data", message_data_out.str()},
-                {"topic_data", topic_data_out.str()}
+                {"topic_data", topic_data_out.str()},
+                {"message_type", TypeHelper::Instance()->demangle(typeid(T).name())}
         };
+        Logger::info(TypeHelper::Instance()->demangle(typeid(T).name()));
         auto res = client.Post(std::string(SEND_BASE) + TypeHelper::Instance()->demangle(typeid(T).name()), params);
         return res;
     }
@@ -105,11 +104,8 @@ namespace YasashiiServer {
         }
         std::stringstream message_data_out;
         {
-            MessageData<T> message;
-            message.message = msg;
-            message.type = typeid(T).name();
             cereal::BinaryOutputArchive oarchive(message_data_out);
-            oarchive(message);
+            oarchive(msg);
         }
         httplib::Params params = {
                 {"producer_name", prod.getName()},
