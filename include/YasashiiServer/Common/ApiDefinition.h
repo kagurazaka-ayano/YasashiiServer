@@ -8,8 +8,6 @@
 #ifndef YASASHIISERVER_APIDEFINITION_H
 #define YASASHIISERVER_APIDEFINITION_H
 
-#include <string>
-
 namespace YasashiiServer {
     constexpr char RELATE[] = "/queue/relate";
     constexpr char UNRELATE[] = "/queue/unrelate";

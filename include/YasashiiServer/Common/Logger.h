@@ -9,7 +9,6 @@
 #define YASASHIISERVER_LOGGER_H
 
 #include "httplib.h"
-#include "fmt/format.h"
 #include <iostream>
 #include <fstream>
 #include <string>

@@ -93,8 +93,8 @@ namespace YasashiiServer {
 
     std::string Logger::getLogString(const std::string &message, LogLevel log_level) {
         std::string color = log_level_colors[static_cast<int>(log_level)];
-        std::string log_string = color + "[" + getDateTimeString() + "]" + message + "\033[0m";
-        return fmt::format("{}[{}] {}: {}\033[0m", color, getDateTimeString(), getLogLevelString(log_level), message);
+        std::string log_string = color + "[" + getDateTimeString() + "]" + getLogLevelString(log_level) + message + "\033[0m";
+        return log_string;
     }
 
     void ServerLogger::operator()(const httplib::Request &req, const httplib::Response &res) {
@@ -112,12 +112,9 @@ namespace YasashiiServer {
             log_level = LogLevel::DEBUG;
         }
         std::string color = log_level_colors[static_cast<int>(log_level)];
-        std::string log_string = fmt::format("{}[{}] {}: {} from {} accessing {} {} {}\033[0m",
-                                             color,
-                                             getDateTimeString(),
-                                             getLogLevelString(log_level),
-                                             req.method, req.remote_addr, req.path,
-                                             std::to_string(res.status), res.body);
+        std::string log_string = color + "[" + getDateTimeString() + "] " + getLogLevelString(log_level) + ": "
+                + req.method + " from " + req.remote_addr + " accessing " + req.path +
+                std::to_string(res.status) + " " + res.body + "\033[0m";
         *log_stream << log_string << std::endl;
         saveLog(log_string);
     }
@@ -137,13 +134,9 @@ namespace YasashiiServer {
             log_level = LogLevel::DEBUG;
         }
         std::string color = log_level_colors[static_cast<int>(log_level)];
-        std::string log_string = fmt::format(
-                "{}[{}]: {}: {} at path {} to server {} status: {} body: {}\033[0m",
-                color,
-                getDateTimeString(),
-                getLogLevelString(log_level),
-                req.method, req.path, req.remote_addr,
-                std::to_string(res.status), res.body);
+        std::string log_string = color +"[" + getDateTimeString() + "]:" + getLogLevelString(log_level) +
+                ": " + req.method + " at path " + req.path + " to server " + req.remote_addr + " status:" +
+                std::to_string(res.status) + " body: "+ res.body + "\033[0m";
         *log_stream << log_string << std::endl;
         saveLog(log_string);
     }

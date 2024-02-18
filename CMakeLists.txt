@@ -1,28 +1,26 @@
 cmake_minimum_required(VERSION 3.27)
 
 project(YasashiiServer LANGUAGES CXX)
-include(FetchContent)
 set(CMAKE_CXX_STANDARD 23)
+include(FetchContent)
+include(FindProtobuf)
+
 
 file(GLOB SRC_SERVER src/server/*.cpp)
 file(GLOB SRC_CLIENT src/client/*.cpp)
-set(INCLUDE_COMMON include/YasashiiServer/common)
-set(INCLUDE_SERVER include/YasashiiServer/server)
-set(INCLUDE_CLIENT include/YasashiiServer/client)
-file(GLOB COMMON src/common/*.cpp)
-list(APPEND SRC_COMMON ${COMMON})
+file(GLOB SRC_COMMON src/common/*.cpp)
+set(INCLUDE_COMMON include/YasashiiServer/Common)
+set(INCLUDE_SERVER include/YasashiiServer/Server)
+set(INCLUDE_CLIENT include/YasashiiServer/Client)
+set(protobuf_BUILD_TESTS OFF)
+set(KawaiiMQ_BUILD_TESTS OFF)
+set(ABSL_PROPAGATE_CXX_STD ON)
+set(SKIP_PERFORMANCE_COMPARISON ON)
 
-include(FetchContent)
+
 set(INCLUDE ${INCLUDE_COMMON})
-
-FetchContent_Declare(
-        fmt
-        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-        GIT_TAG        master
-)
-FetchContent_MakeAvailable(fmt)
-list(APPEND INCLUDE ${fmt_SOURCE_DIR}/include)
-link_libraries(fmt::fmt)
+list(APPEND INCLUDE ${Protobuf_INCLUDE_DIRS})
+link_libraries(protobuf::libprotobuf)
 
 FetchContent_Declare(
         KawaiiMQ
@@ -41,12 +39,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(httplib)
 list(APPEND INCLUDE ${httplib_SOURCE_DIR})
 
-FetchContent_Declare(cereal
-        GIT_REPOSITORY https://github.com/USCiLab/cereal.git
-        GIT_TAG        master
-)
-FetchContent_MakeAvailable(cereal)
-list(APPEND INCLUDE ${cereal_SOURCE_DIR}/include)
+add_subdirectory(proto "${CMAKE_SOURCE_DIR}/protoOutput")
 
 include_directories(${INCLUDE})
 

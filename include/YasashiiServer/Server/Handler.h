@@ -11,15 +11,7 @@
 #include "httplib.h"
 #include "KawaiiMQ/kawaiiMQ.h"
 #include "Logger.h"
-#include "Types/SerializationTypes.h"
 #include "ServerHelper.h"
-#include "cereal/archives/binary.hpp"
-#include "cereal/types/memory.hpp"
-#include "cereal/types/unordered_map.hpp"
-#include "cereal/types/vector.hpp"
-#include "cereal/types/polymorphic.hpp"
-#include "cereal/archives/portable_binary.hpp"
-#include "Types/TypeHelper.h"
 #include <cstdlib>
 #include <type_traits>
 #include <string>
@@ -27,50 +19,52 @@
 
 namespace YasashiiServer {
 
-    class RelateHandler {
+    class IHandler {
     public:
-        void operator()(const httplib::Request &req, httplib::Response &res);
+        virtual void operator()(const httplib::Request &req, httplib::Response &res) = 0;
     };
 
-    class UnrelateHandler {
+    class RelateHandler : public IHandler {
     public:
-        void operator()(const httplib::Request &req, httplib::Response &res);
+        void operator()(const httplib::Request &req, httplib::Response &res) override;
     };
 
-    class ProducerSubscribeHandler {
+    class UnrelateHandler : public IHandler {
     public:
-        void operator()(const httplib::Request &req, httplib::Response &res);
+        void operator()(const httplib::Request &req, httplib::Response &res) override;
     };
 
-    class ProducerUnsubscribeHandler {
+    class ProducerSubscribeHandler : public IHandler {
     public:
-        void operator()(const httplib::Request &req, httplib::Response &res);
+        void operator()(const httplib::Request &req, httplib::Response &res) override;
     };
 
-    class ConsumerSubscribeHandler {
+    class ProducerUnsubscribeHandler : public IHandler {
     public:
-        void operator()(const httplib::Request &req, httplib::Response &res);
+        void operator()(const httplib::Request &req, httplib::Response &res) override;
     };
 
-    class ConsumerUnsubscribeHandler {
+    class ConsumerSubscribeHandler : public IHandler {
     public:
-        void operator()(const httplib::Request &req, httplib::Response &res);
+        void operator()(const httplib::Request &req, httplib::Response &res) override;
     };
 
-    class SetTimeoutHandler {
+    class ConsumerUnsubscribeHandler : public IHandler {
     public:
-        void operator()(const httplib::Request &req, httplib::Response &res);
+        void operator()(const httplib::Request &req, httplib::Response &res) override;
     };
 
-    class SetSafeTimeoutHandler {
+    class SetTimeoutHandler : public IHandler {
     public:
-        void operator()(const httplib::Request &req, httplib::Response &res);
+        void operator()(const httplib::Request &req, httplib::Response &res) override;
     };
 
-    class SendHandler {
+    class SetSafeTimeoutHandler : public IHandler {
     public:
-        void operator()(const httplib::Request &req, httplib::Response &res);
+        void operator()(const httplib::Request &req, httplib::Response &res) override;
     };
+
+
 }
 
 #endif //YASASHIISERVER_HANDLER_H
