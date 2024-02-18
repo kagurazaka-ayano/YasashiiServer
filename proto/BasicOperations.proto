@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package YasashiiServer;
+
+message RelateRequest {
+  string queue_name = 1;
+  string topic_name = 2;
+}
+
+message RelateResponse {
+  string queue_name = 1;
+  string queue = 2;
+  string error = 3;
+}
+
+message UnrelateRequest {
+  string queue_name = 1;
+  string topic_name = 2;
+}
+
+message UnrelateResponse {
+  string queue_name = 1;
+  string queue = 2;
+  string error = 3;
+}
+
+message ConsumerSubscribeRequest {
+  string consumer_name = 1;
+  string topic_name = 2;
+}
+
+message ConsumerSubscribeResponse {
+  string consumer_name = 1;
+  string topic_name = 2;
+  string error = 3;
+}
+
+message ProducerSubscribeRequest {
+  string producer_name = 1;
+  string topic_name = 2;
+}
+
+message ProducerSubscribeResponse {
+  string producer_name = 1;
+  string topic_name = 2;
+  string error = 3;
+}
+
+message SetTimeoutRequest {
+  string queue_name = 1;
+  int64 timeout = 2;
+}
+
+message SetTimeoutResponse {
+  string queue_name = 1;
+  int64 timeout = 2;
+  string error = 3;
+}
+
+message SetSafeTimeoutRequest {
+  string queue_name = 1;
+  int64 timeout = 2;
+}
+
+message SetSafeTimeoutResponse {
+  string queue_name = 1;
+  int64 timeout = 2;
+  string error = 3;
+}
+
+message GetTimeoutRequest {
+  string queue_name = 1;
+}
+
+message GetTimeoutResponse {
+  string queue_name = 1;
+  int64 timeout = 2;
+  string error = 3;
+}
+
+message GetSafeTimeoutRequest {
+  string queue_name = 1;
+}
+
+message GetSafeTimeoutResponse {
+  string queue_name = 1;
+  int64 timeout = 2;
+  string error = 3;
+}
+
+

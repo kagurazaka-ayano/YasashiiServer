@@ -8,13 +8,14 @@
 #ifndef YASASHIISERVER_CLIENTHELPER_H
 #define YASASHIISERVER_CLIENTHELPER_H
 
-#include "httplib.h"
-#include "KawaiiMQ/kawaiiMQ.h"
-#include "Logger.h"
-#include "ApiDefinition.h"
 #include <limits>
 #include <memory>
 #include <cxxabi.h>
+#include <httplib.h>
+#include <KawaiiMQ/kawaiiMQ.h>
+#include "Logger.h"
+#include "ApiDefinition.h"
+#include "BasicOperations.pb.h"
 
 
 namespace YasashiiServer {

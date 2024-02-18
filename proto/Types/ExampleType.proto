@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package YasashiiServer;
+
+message ExampleType {
+  uint64 id = 1;
+  bool bool_message = 2;
+  int32 int_message = 3;
+  double string_message = 4;
+}
+

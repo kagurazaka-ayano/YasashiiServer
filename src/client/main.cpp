@@ -17,14 +17,4 @@ using namespace YasashiiServer;
 int main() {
 
 
-//    auto queue = KawaiiMQ::makeQueue("testqueue");
-//    KawaiiMQ::Topic topic("testtopic");
-//    KawaiiMQ::Producer prod("testprod");
-//    KawaiiMQ::Consumer con("testcon");
-//    httplib::Client client(HOST, PORT);
-//    client.set_logger(ClientLogger());
-//    relate(client, topic, queue);
-//    subscribe(client, con, topic);
-//    subscribe(client, prod, topic);
-
 }
